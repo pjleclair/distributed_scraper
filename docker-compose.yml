@@ -1,0 +1,13 @@
+services:
+  localstack:
+    image: localstack/localstack:0.14.2
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=lambda,s3,dynamodb,iam,sqs
+      - DEFAULT_REGION=us-east-1
+      - LAMBDA_EXECUTOR=docker
+      - LAMBDA_REMOTE_DOCKER=false
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "${TMPDIR:-/tmp}/localstack:/tmp/localstack"
