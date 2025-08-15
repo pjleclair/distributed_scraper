@@ -1,7 +1,12 @@
 import boto3
 from urllib.parse import urlparse
 import os
+import getpass
 
+if not os.environ.get("GOOGLE_API_KEY"):
+  os.environ["GOOGLE_API_KEY"] = getpass.getpass("Enter API key for Google Gemini: ")
+
+from langchain.chat_models import init_chat_model
 
 class S3Pipeline:
     def __init__(self, aws_bucket_name):
@@ -56,13 +61,18 @@ class DynamoDBPipeline:
         return cls(aws_table_name=crawler.settings.get("DYNAMODB_TABLE_NAME"))
 
     def process_item(self, item, spider):
+        model = init_chat_model("gemini-2.5-flash", model_provider="google_genai")
+
+        schema = {
+            "url": "The url of a website being scraped",
+            "product_title": "The title of the product featured on the scraped page",
+            "price": "The pricing of the product featured on the scraped page"
+        }
+
+        model_with_structure = model.with_structured_output(schema)
+        structured_output = model_with_structure.invoke(item['raw_text'])
+
         # Only process items that have a price (or other key data)
         spider.logger.info(f"Writing item to DynamoDB: {item['product_title']}")
-        self.table.put_item(
-            Item={
-                "url": item["url"],
-                "product_title": item["product_title"],
-                "price": item["price"],
-            }
-        )
+        self.table.put_item(structured_output)
         return item
