@@ -2,3 +2,4 @@ boto3==1.28.57
 botocore==1.31.57
 scrapy
 langchain[google-genai]
+pydantic
