@@ -118,6 +118,14 @@ To update only the Lambda function code:
 ./update_lambda.sh
 ```
 
+### Send Messages to SQS
+
+To send messages to SQS:
+
+```bash
+./send_msg.sh
+```
+
 ## Development
 
 ### Project Components
